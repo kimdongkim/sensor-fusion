@@ -4,8 +4,10 @@ reuler = csvread('ms25_euler.csv');
 rimu = csvread('ms25.csv');
 
 %delete NaN
-rgps = fillmissing(rgps1, 'previous');
-rrtk = fillmissing(rrtk1, 'previous');
+rgps0 = fillmissing(rgps1, 'previous');
+rrtk0 = fillmissing(rrtk1, 'previous');
+rgps = fillmissing(rgps0, 'next');
+rrtk = fillmissing(rrtk0, 'next');
 
 %%fix phone axis
 x1=rimu(:,5);
@@ -93,14 +95,13 @@ end
 lat=rgps(:,4);
 lon=rgps(:,5);
 alt=rgps(:,6);
-alt(1)=265.8;
 lla=[lat lon alt];
 lla0=[lat(1) lon(1) alt(1)];
 xyzNED = lla2ned(lla,lla0,'flat');
 %GPS spline
 gpst=length(xyzNED);
 step2=(t-1)/(gpst-1);
-splgps=1:step:t;
+splgps=1:step2:t;
 splt=(1:t)';
 splx=xyzNED(:,1);
 sply=xyzNED(:,2);
@@ -118,8 +119,8 @@ llar0=[latr(1) lonr(1) altr(1)];
 rtkNED = lla2ned(llar,llar0,'flat');
 %RTK spline
 rtkt=length(rtkNED);
-step2=(t-1)/(rtkt-1);
-splrtk=1:step2:t;
+step3=(t-1)/(rtkt-1);
+splrtk=1:step3:t;
 splt=(1:t)';
 rtksx=rtkNED(:,1);
 rtksy=rtkNED(:,2);
