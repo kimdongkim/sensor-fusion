@@ -200,53 +200,61 @@ title('Corse2');
 %course1 error
 error1x=zeros(1,3003);
 error1y=zeros(1,3003);
+error1=zeros(1,3003);
 for k=70060:73062
 error1x(k-70059)=abs(rtkxx(k)-px(k));
 error1y(k-70059)=abs(rtkyy(k)-py(k));
-end
-for k=1:3003;
-error1(k)=sqrt(error1x(k)^2+error1y(k)^2);
+error1(k-70059)=sqrt(error1x(k-70059)^2+error1y(k-70059)^2);
 end
 nb1=70060:73062;
+num1=nb1';
+erx1=error1x';
+ery1=error1y';
+er1=error1';
 figure
-plot(nb1,error1x,'-')
+plot(num1,erx1,'-')
 xlabel('sample');
 ylabel('x error(m)');
 title('Course1 x error');
 figure
-plot(nb1,error1y,'-')
+plot(num1,ery1,'-')
 xlabel('sample');
 ylabel('y error(m)');
 title('Course1 y error');
-plot(nb1,error1,'-')
+figure
+plot(num1,er1,'-')
 xlabel('sample');
 ylabel('course1 error(m)');
 title('Course1 error');
-average1=mean(error1);
+average1=mean(er1);
 
 %course2 error
 error2x=zeros(1,3003);
 error2y=zeros(1,3003);
+error2=zeros(1,3003);
 for k=100560:103562
 error2x(k-100559)=abs(rtkxx(k)-px(k));
 error2y(k-100559)=abs(rtkyy(k)-py(k));
-end
-for k=1:3003;
-error2(k)=sqrt(error1x(k)^2+error1y(k)^2);
+error2(k-100559)=sqrt(error2x(k-100559)^2+error2y(k-100559)^2);
 end
 nb2=100560:103562;
+num2=nb2';
+erx2=error2x';
+ery2=error2y';
+er2=error2';
 figure
-plot(nb2,error2x,'-')
+plot(num2,erx2,'-')
 xlabel('sample');
 ylabel('x error(m)');
 title('Course2 x error');
 figure
-plot(nb2,error2y,'-')
+plot(num2,ery2,'-')
 xlabel('sample');
 ylabel('y error(m)');
-title('Course1 y error');
-plot(nb2,error2,'-')
+title('Course2 y error');
+figure
+plot(num2,er2,'-')
 xlabel('sample');
-ylabel('course1 error');
-title('Course1 error');
-average2=mean(error2);
+ylabel('course2 error(m)');
+title('Course2 error');
+average2=mean(er2);
