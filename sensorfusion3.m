@@ -2,7 +2,9 @@ rgps1 = csvread('gps.csv');
 rrtk1 = csvread('gps_rtk.csv');
 reuler = csvread('ms25_euler.csv');
 rimu = csvread('ms25.csv');
-
+pgps = csvread('predictgps.csv');
+coursex=pgps(:,1);
+coursey=pgps(:,2);
 %delete NaN
 rgps0 = fillmissing(rgps1, 'previous');
 rrtk0 = fillmissing(rrtk1, 'previous');
@@ -128,19 +130,16 @@ rtksz=rtkNED(:,3);
 rtkxx=spline(splrtk,rtksx,splt);
 rtkyy=spline(splrtk,rtksy,splt);
 rtkzz=spline(splrtk,rtksz,splt);
+figure
+plot(rtkxx(50000:120000),rtkyy(50000:120000),'-')
+xlabel('position X');
+ylabel('position Y');
+title('True course');
 
-%write csv
-splinegps=[posx;posy;posz]';
-splinertk=[rtkxx;rtkyy;rtkzz]';
-acc1=[x3;y3;z3]';
-rtkfilename = 'nedrtk.csv';
-gpsfilename = 'nedgps.csv';
-accfilename = 'nedaccel.csv';
-eulerfilename = 'nedeuler.csv';
-csvwrite(gpsfilename, splinegps);
-csvwrite(accfilename, acc1);
-csvwrite(eulerfilename, e);
-csvwrite(rtkfilename, splinertk);
+%Use predict gps data
+pgps = csvread('predictgps.csv');
+coursex=pgps(:,1);
+coursey=pgps(:,2);
 
 %kalmanfilter
 px=zeros(1,t);
@@ -161,18 +160,18 @@ A = [ 1  dt  0.5*dt^2  0  0  0
 Q = 0.05*eye(6);
 R = 0.1*eye(6);
 P = 1*eye(6,6);
-for k=2:t;
+for k=2:t
   vvx(k)=vvx(k-1)+x3(k)* dt;
   vvy(k)=vvy(k-1)+y3(k)* dt;
 end
-for k=1:t;
+for k=1:t
   x = [px(k), vx(k), x3(k), py(k), vy(k), y3(k)]';
 xp = A*x
 Pp = A*P*A' + Q;
 
 K = Pp*H'*inv(H*Pp*H' + R);
 
-z = [posy(k) vvx(k) x3(k) posx(k) vvy(k) y3(k)]';
+z = [posx(k) vvx(k) x3(k) posy(k) vvy(k) y3(k)]';
 x = xp + K*(z - H*xp);
 P = Pp - K*H*Pp;
 
@@ -183,5 +182,71 @@ vy(k+1)=x(5);
 end
 
 figure
-plot(px,py,'-');
+plot(px(50000:120000),py(50000:120000),'-')
+xlabel('position X');
+ylabel('position Y');
+title('sensor fusion');
+figure
+plot(px(70060:73062),py(70060:73062),'-')
+xlabel('position X');
+ylabel('position Y');
+title('Corse1');
+figure
+plot(px(100560:103562),py(100560:103562),'-')
+xlabel('position X');
+ylabel('position Y');
+title('Corse2');
 
+%course1 error
+error1x=zeros(1,3003);
+error1y=zeros(1,3003);
+for k=70060:73062
+error1x(k-70059)=abs(rtkxx(k)-px(k));
+error1y(k-70059)=abs(rtkyy(k)-py(k));
+end
+for k=1:3003;
+error1(k)=sqrt(error1x(k)^2+error1y(k)^2);
+end
+nb1=70060:73062;
+figure
+plot(nb1,error1x,'-')
+xlabel('sample');
+ylabel('x error(m)');
+title('Course1 x error');
+figure
+plot(nb1,error1y,'-')
+xlabel('sample');
+ylabel('y error(m)');
+title('Course1 y error');
+plot(nb1,error1,'-')
+xlabel('sample');
+ylabel('course1 error(m)');
+title('Course1 error');
+average1=mean(error1);
+
+%course2 error
+error2x=zeros(1,3003);
+error2y=zeros(1,3003);
+for k=100560:103562
+error2x(k-100559)=abs(rtkxx(k)-px(k));
+error2y(k-100559)=abs(rtkyy(k)-py(k));
+end
+for k=1:3003;
+error2(k)=sqrt(error1x(k)^2+error1y(k)^2);
+end
+nb2=100560:103562;
+figure
+plot(nb2,error2x,'-')
+xlabel('sample');
+ylabel('x error(m)');
+title('Course2 x error');
+figure
+plot(nb2,error2y,'-')
+xlabel('sample');
+ylabel('y error(m)');
+title('Course1 y error');
+plot(nb2,error2,'-')
+xlabel('sample');
+ylabel('course1 error');
+title('Course1 error');
+average2=mean(error2);
