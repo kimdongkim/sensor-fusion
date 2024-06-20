@@ -1,7 +1,7 @@
-rgps1 = csvread('gps.csv');
-rrtk1 = csvread('gps_rtk.csv');
-reuler = csvread('ms25_euler.csv');
-rimu = csvread('ms25.csv');
+rgps1 = csvread('gps0204.csv');
+rrtk1 = csvread('gps_rtk0204.csv');
+reuler = csvread('ms25_euler0204.csv');
+rimu = csvread('ms250204.csv');
 
 %delete NaN
 rgps0 = fillmissing(rgps1, 'previous');
@@ -10,6 +10,7 @@ rgps = fillmissing(rgps0, 'next');
 rrtk = fillmissing(rrtk0, 'next');
 
 %%fix phone axis
+time1=rimu(:,1);
 x1=rimu(:,5);
 y1=rimu(:,6);
 z1=-rimu(:,7);
@@ -85,10 +86,15 @@ Ry2 = [cos(theta2) 0 sin(theta2); 0 1 0; -sin(theta2) 0 cos(theta2)];
 Rz2 = [cos(psi2) -sin(psi2) 0; sin(psi2) cos(psi2) 0; 0 0 1]; 
 R2 = Rz2 * Ry2 * Rx2;
 accro2=[x2(k); y2(k); z2(k)];
+magro2=[mx2(k); my2(k); mz2(k)];
 accor2 = R' * accro2;
+NEDmag= R' * magro2;
 x3(k)=accor2(1);
 y3(k)=accor2(2);
 z3(k)=accor2(3);
+mx3(k)=NEDmag(1);
+my3(k)=NEDmag(2);
+mz3(k)=NEDmag(3);
 end
 
 %NED GPS
@@ -130,14 +136,23 @@ rtkyy=spline(splrtk,rtksy,splt);
 rtkzz=spline(splrtk,rtksz,splt);
 
 %write csv
-splinegps=[posx;posy;posz]';
-splinertk=[rtkxx;rtkyy;rtkzz]';
-acc1=[x3;y3;z3]';
-rtkfilename = 'nedrtk.csv';
-gpsfilename = 'nedgps.csv';
-accfilename = 'nedaccel.csv';
-eulerfilename = 'nedeuler.csv';
-csvwrite(gpsfilename, splinegps);
-csvwrite(accfilename, acc1);
-csvwrite(eulerfilename, e);
-csvwrite(rtkfilename, splinertk);
+time=time1';
+splinegps=[time;posx';posy';posz']';
+splinertk=[time;rtkxx';rtkyy';rtkzz']';
+acc1=[time;x3;y3;z3]';
+mag1=[time;mx3;my3;mz3]';
+magfilename='nedmag0204.xlsx';
+rtkfilename = 'nedrtk0204.xlsx';
+gpsfilename = 'nedgps0204.xlsx';
+accfilename = 'nedaccel0204.xlsx';
+eulerfilename = 'nedeuler0204.xlsx';
+xlswrite(gpsfilename, splinegps);
+xlswrite(accfilename, acc1);
+xlswrite(eulerfilename, e);
+xlswrite(rtkfilename, splinertk);
+xlswrite(magfilename, mag1);
+figure
+plot(posx(:,1),posy(:,1),'-')
+xlabel('position X');
+ylabel('position Y');
+title('spline');
