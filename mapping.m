@@ -18,7 +18,8 @@ alt = zeros(t, 1);
 lat0=latitude0(1);
 lon0=longitude0(1);
 alt0=alt1(1);
-for i = 1:t
+gpst=length(x1);
+for i = 1:gpst
     [lat(i), lon(i), alt(i)] = ned2geodetic(x(i), y(i), z(i), lat0, lon0, alt0, wgs84Ellipsoid,"radians");
 end
 
@@ -41,6 +42,16 @@ geolimits([min(latitude1) max(latitude1)], [min(longitude1) max(longitude1)]);
 
 % Set the type of basemap
 geobasemap('streets');
+% Add a red line annotation in the top-right corner
+annotation('line', [0.75, 0.85], [0.9, 0.9], 'Color', 'red', 'LineWidth', 1.5);
+
+% Add a blue line annotation below the red line
+annotation('line', [0.75, 0.85], [0.85, 0.85], 'Color', 'blue', 'LineWidth', 1.5);
+
+annotation('textbox', [0.86, 0.87, 0.1, 0.1], 'String', 'Ground truth', ...
+           'EdgeColor', 'none', 'FontSize', 10, 'Color', 'red', 'FontWeight', 'bold');
+annotation('textbox', [0.86, 0.82, 0.1, 0.1], 'String', 'GPS', ...
+           'EdgeColor', 'none', 'FontSize', 10, 'Color', 'blue', 'FontWeight', 'bold');
 
 % Loop to plot the route dynamically for both locations
 for i = 1:length(latitude1)
